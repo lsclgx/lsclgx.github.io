@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>浏览器2-浏览器多进程介绍 | lsc的博客</title><meta name="keywords" content="浏览器"><meta name="author" content="lsc"><meta name="copyright" content="lsc"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Chrome架构：仅仅打开一个页面，为什么有4个进程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浏览器2-浏览器多进程介绍">
+<meta property="og:url" content="http://example.com/2020/12/11/%E6%B5%8F%E8%A7%88%E5%99%A82-%E6%B5%8F%E8%A7%88%E5%99%A8%E5%A4%9A%E8%BF%9B%E7%A8%8B%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="lsc的博客">
+<meta property="og:description" content="Chrome架构：仅仅打开一个页面，为什么有4个进程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+<meta property="article:published_time" content="2020-12-11T01:26:01.000Z">
+<meta property="article:modified_time" content="2022-07-14T15:32:04.336Z">
+<meta property="article:author" content="lsc">
+<meta property="article:tag" content="浏览器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2020/12/11/%E6%B5%8F%E8%A7%88%E5%99%A82-%E6%B5%8F%E8%A7%88%E5%99%A8%E5%A4%9A%E8%BF%9B%E7%A8%8B%E4%BB%8B%E7%BB%8D/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":false,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '浏览器2-浏览器多进程介绍',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-07-14 23:32:04'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://lishichang.gitee.io/img/avatar.webp" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">22</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">lsc的博客</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">浏览器2-浏览器多进程介绍</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2020-12-11T01:26:01.000Z" title="发表于 2020-12-11 09:26:01">2020-12-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/browser/">browser</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="浏览器2-浏览器多进程介绍"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><h4 id="Chrome架构：仅仅打开一个页面，为什么有4个进程"><a href="#Chrome架构：仅仅打开一个页面，为什么有4个进程" class="headerlink" title="Chrome架构：仅仅打开一个页面，为什么有4个进程"></a>Chrome架构：仅仅打开一个页面，为什么有4个进程</h4><span id="more"></span>
+
+<h5 id="并行处理"><a href="#并行处理" class="headerlink" title="并行处理"></a>并行处理</h5><p>同一时间处理多个任务，能大大提升性能</p>
+<h5 id="进程和线程（像工厂和流水线的关系）"><a href="#进程和线程（像工厂和流水线的关系）" class="headerlink" title="进程和线程（像工厂和流水线的关系）"></a>进程和线程（像工厂和流水线的关系）</h5><p>​		一个进程就是一个程序的运行实例。启动一个程序的时候，操作系统会为这个程序开辟一块内存，用来存放代码、执行中的数据、执行任务的主线程，</p>
+<p>这样一个运行环境我们叫做一个进程。</p>
+<p>​		线程是由进程启动和管理的</p>
+<p>​		要注意的点：多进程处理</p>
+<p>​		1.进程中任意一个线程出错，都会导致进程崩溃</p>
+<p>​		2.线程之间共享进程中的数据</p>
+<p>​		3.当进程被关闭时，操作系统会将分配的内存回收</p>
+<p>​		4.进程之间的内容相互隔离</p>
+<p>​		进程隔离是为了保护各进程互不干扰，不会一个进程崩溃导致其他进程崩溃。进程之间通信有（IPC）机制</p>
+<h5 id="单进程浏览器"><a href="#单进程浏览器" class="headerlink" title="单进程浏览器"></a>单进程浏览器</h5><p>1.不稳定。早期浏览器采用插件来实现web视频，web游戏等，插件是很不稳定的，插件崩溃导致进程就崩溃了；渲染引擎模块也不稳定，一段复杂的js代码就可能导致渲染引擎模块崩溃，进程也跟着崩溃了。</p>
+<p>2.不流畅。所有模块在同一个进程，多个模块在同一个线程，没有更好运用并行处理，效率肯定不高；脚本和插件也会让浏览器变的卡顿；内存泄漏也会导致卡顿，而且浏览器运行一个复杂点的页面，再关闭，会存在内存不能完全回收的情况，导致内存越占越多，变得卡顿。</p>
+<p>3.不安全。插件和脚本都可能对操作系统做恶意攻击</p>
+<h5 id="早期的多进程架构"><a href="#早期的多进程架构" class="headerlink" title="早期的多进程架构"></a>早期的多进程架构</h5><p><img src="/image/%E6%97%A9%E6%9C%9F%E7%9A%84%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BB%93%E6%9E%84.png" alt="早期的多进程结构"></p>
+<p>1.解决不稳定。插件和渲染进程分离，不会相互影响</p>
+<p>2.解决不流畅。每个页面有独立的渲染进程，不会相互影响，内存泄漏后关闭页面，内存回收，减少卡顿</p>
+<p>3.解决不安全。渲染进程和插件进程运行在沙盒中，可以理解为操作系统为进程上了一把锁，即使有恶意插件或脚本，也不能越过沙盒去获取系统权限或读写敏感硬盘数据</p>
+<h5 id="目前的多进程架构（2020-x2F-12-x2F-11）"><a href="#目前的多进程架构（2020-x2F-12-x2F-11）" class="headerlink" title="目前的多进程架构（2020&#x2F;12&#x2F;11）"></a>目前的多进程架构（2020&#x2F;12&#x2F;11）</h5><p>最新的 Chrome 浏览器包括：1 个浏览器（Browser）主进程、1 个 GPU 进程、1 个网络（NetWork）进程、多个渲染进程和多个插件进程。</p>
+<p><img src="/image/%E7%9B%AE%E5%89%8D%E7%9A%84%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BB%93%E6%9E%84.png" alt="目前的多进程结构"></p>
+<p>浏览器进程：主要负责界面显示，用户交互，子进程管理，同时提供存储功能</p>
+<p>渲染进程：将html，css，js转换为网页，排版引擎Blink和js引擎都在这个进程中运行，chrome默认会为每个tab页创建一个渲染进程，并上锁，稳定流畅安全</p>
+<p>GPU进程：GPU的使用最初是为了实现3D css效果，后来网页和chrome的ui界面都选择用GPU来绘制，所以架构上加了GPU进程</p>
+<p>网络进程：负责网络资源的加载</p>
+<p>插件进程：插件容易崩溃及可能存在恶意插件，为了安全和稳定，插件运行在这个沙盒环境里</p>
+<p>缺点：</p>
+<p>1.更高的资源占用：每个进程都会包含公共基础结构的副本（如js的运行环境）</p>
+<p>2.更复杂的体系结构：耦合性和扩展性差</p>
+<h5 id="未来面向服务的架构（SOA）"><a href="#未来面向服务的架构（SOA）" class="headerlink" title="未来面向服务的架构（SOA）"></a>未来面向服务的架构（SOA）</h5><p>Chrome 最终要把 UI、数据库、文件、设备、网络等模块重构为基础服务，类似操作系统底层服务，下面是 Chrome“面向服务的架构”的进程模型图：</p>
+<p><img src="/image/%E6%9C%AA%E6%9D%A5%E9%9D%A2%E5%90%91%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%A4%9A%E8%BF%9B%E7%A8%8B%E6%9E%B6%E6%9E%84.png" alt="未来面向服务的多进程架构"></p>
+<p>同时 Chrome 还提供灵活的弹性架构，在强大性能设备上会以多进程的方式运行基础服务，但是如果在资源受限的设备上（如下图），Chrome 会将很多服务整合到一个进程中，从而节省内存占用。</p>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%B5%8F%E8%A7%88%E5%99%A8/">浏览器</a></div><div class="post_share"></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/12/11/%E6%B5%8F%E8%A7%88%E5%99%A83-tcp%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E6%A8%A1%E5%9E%8B/"><img class="prev-cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">浏览器3-tcp网络传输模型</div></div></a></div><div class="next-post pull-right"><a href="/2020/12/10/%E6%B5%8F%E8%A7%88%E5%99%A81-%E5%8F%91%E5%B1%95%E5%8E%86%E5%8F%B2/"><img class="next-cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">浏览器1-发展历史</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/12/10/%E6%B5%8F%E8%A7%88%E5%99%A81-%E5%8F%91%E5%B1%95%E5%8E%86%E5%8F%B2/" title="浏览器1-发展历史"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-10</div><div class="title">浏览器1-发展历史</div></div></a></div><div><a href="/2020/12/11/%E6%B5%8F%E8%A7%88%E5%99%A83-tcp%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E6%A8%A1%E5%9E%8B/" title="浏览器3-tcp网络传输模型"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-11</div><div class="title">浏览器3-tcp网络传输模型</div></div></a></div><div><a href="/2020/12/11/%E6%B5%8F%E8%A7%88%E5%99%A84-%E4%BB%8E%E8%BE%93%E5%85%A5%E7%BD%91%E5%9D%80%E5%88%B0%E5%91%88%E7%8E%B0%E9%A1%B5%E9%9D%A2%E7%9A%84%E8%BF%87%E7%A8%8B/" title="浏览器4-从输入网址到呈现页面的过程"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-11</div><div class="title">浏览器4-从输入网址到呈现页面的过程</div></div></a></div><div><a href="/2020/12/11/%E6%B5%8F%E8%A7%88%E5%99%A84.1-%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98/" title="浏览器4.1-浏览器缓存"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-11</div><div class="title">浏览器4.1-浏览器缓存</div></div></a></div><div><a href="/2020/12/11/%E6%B5%8F%E8%A7%88%E5%99%A84.2-%E8%AF%B7%E6%B1%82%E7%BC%93%E5%AD%98/" title="浏览器4.2-请求缓存"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-11</div><div class="title">浏览器4.2-请求缓存</div></div></a></div><div><a href="/2021/06/16/%E6%B5%8F%E8%A7%88%E5%99%A85-%E5%AE%89%E5%85%A8%E7%AE%80%E4%BB%8B/" title="浏览器5-浏览器安全简单了解"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-16</div><div class="title">浏览器5-浏览器安全简单了解</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://lishichang.gitee.io/img/avatar.webp" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">lsc</div><div class="author-info__description">欢迎！</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">22</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lsclgx/lsclgx.github.io/tree/master"><i class="fab fa-github"></i><span>Github</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Chrome%E6%9E%B6%E6%9E%84%EF%BC%9A%E4%BB%85%E4%BB%85%E6%89%93%E5%BC%80%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%894%E4%B8%AA%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">Chrome架构：仅仅打开一个页面，为什么有4个进程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B9%B6%E8%A1%8C%E5%A4%84%E7%90%86"><span class="toc-number">1.1.</span> <span class="toc-text">并行处理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B%EF%BC%88%E5%83%8F%E5%B7%A5%E5%8E%82%E5%92%8C%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%9A%84%E5%85%B3%E7%B3%BB%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">进程和线程（像工厂和流水线的关系）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8D%95%E8%BF%9B%E7%A8%8B%E6%B5%8F%E8%A7%88%E5%99%A8"><span class="toc-number">1.3.</span> <span class="toc-text">单进程浏览器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%97%A9%E6%9C%9F%E7%9A%84%E5%A4%9A%E8%BF%9B%E7%A8%8B%E6%9E%B6%E6%9E%84"><span class="toc-number">1.4.</span> <span class="toc-text">早期的多进程架构</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%AE%E5%89%8D%E7%9A%84%E5%A4%9A%E8%BF%9B%E7%A8%8B%E6%9E%B6%E6%9E%84%EF%BC%882020-x2F-12-x2F-11%EF%BC%89"><span class="toc-number">1.5.</span> <span class="toc-text">目前的多进程架构（2020&#x2F;12&#x2F;11）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9C%AA%E6%9D%A5%E9%9D%A2%E5%90%91%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%9E%B6%E6%9E%84%EF%BC%88SOA%EF%BC%89"><span class="toc-number">1.6.</span> <span class="toc-text">未来面向服务的架构（SOA）</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By lsc</div><div class="footer_custom_text">欢迎来到我的博客</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
