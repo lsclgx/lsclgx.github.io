@@ -4,6 +4,83 @@
   
     
     <entry>
+      <title>Vue3响应式系统-reactive、ref</title>
+      <link href="/2024/07/21/Vue3%E5%93%8D%E5%BA%94%E5%BC%8F%E7%B3%BB%E7%BB%9F-reactive%E3%80%81ref/"/>
+      <url>/2024/07/21/Vue3%E5%93%8D%E5%BA%94%E5%BC%8F%E7%B3%BB%E7%BB%9F-reactive%E3%80%81ref/</url>
+      
+        <content type="html"><![CDATA[<h3 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h3><h4 id="vue2的响应式原理"><a href="#vue2的响应式原理" class="headerlink" title="vue2的响应式原理"></a>vue2的响应式原理</h4><p>它只能监听<strong>指定对象的、指定属性的 getter 和 setter。所以当对象或数组新增属性时，vue2无法为新增的属性增加响应性。</strong></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(target, key, &#123;</span><br><span class="line">  <span class="title function_">set</span>(<span class="params">newVal</span>) &#123;&#125;,</span><br><span class="line">  <span class="title function_">get</span>(<span class="params">key</span>) &#123;&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure><h3 id="vue3的响应式系统"><a href="#vue3的响应式系统" class="headerlink" title="vue3的响应式系统"></a>vue3的响应式系统</h3><h4 id="reactive"><a href="#reactive" class="headerlink" title="reactive"></a>reactive</h4><p>简单实现reactive，核心有几部分</p><p>effect：响应式的依赖收集和触发的机制的体现</p><p>reactive函数：提供出去要使用的函数</p><p>track：收集&#x2F;追踪依赖</p><p>trigger：触发依赖</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// effect，接收一个回调函数，执行</span></span><br><span class="line"><span class="keyword">let</span> activeEffect = <span class="literal">null</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">reactiveEffect</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params">fn</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">fn</span> = fn</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title function_">run</span>(<span class="params"></span>) &#123;</span><br><span class="line">    activeEffect = <span class="variable language_">this</span></span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">fn</span>()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="title function_">effect</span> = (<span class="params">fn</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> re = <span class="keyword">new</span> <span class="title function_">reactiveEffect</span>(fn)</span><br><span class="line">  re.<span class="title function_">run</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// reactive，接收一个对象，返回它的代理对象</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">reactiveFn</span>(<span class="params">target</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Proxy</span>(target, &#123;</span><br><span class="line">    <span class="title function_">get</span>(<span class="params">target, key, receiver</span>) &#123;</span><br><span class="line">      <span class="title function_">track</span>(target, key)</span><br><span class="line">      <span class="keyword">return</span> target[key]</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">set</span>(<span class="params">target, key, value, receiver</span>) &#123;</span><br><span class="line">      target[key] = value</span><br><span class="line">      <span class="title function_">trigger</span>(target, key)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// track，收集依赖</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">track</span>(<span class="params">target, key</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!activeEffect) <span class="keyword">return</span></span><br><span class="line">  <span class="keyword">let</span> depsMap = targetMap.<span class="title function_">get</span>(target)</span><br><span class="line">  <span class="keyword">if</span> (!depsMap) &#123;</span><br><span class="line">    targetMap.<span class="title function_">set</span>(target, (depsMap = <span class="keyword">new</span> <span class="title class_">Map</span>()))</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">let</span> dep = depsMap.<span class="title function_">get</span>(key)</span><br><span class="line">  <span class="keyword">if</span> (!dep) &#123;</span><br><span class="line">    depsMap.<span class="title function_">set</span>(key, (dep = <span class="keyword">new</span> <span class="title class_">Set</span>()))</span><br><span class="line">  &#125;</span><br><span class="line">  dep.<span class="title function_">add</span>(activeEffect)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// trigger，执行依赖</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">trigger</span>(<span class="params">target, key</span>) &#123;</span><br><span class="line">  <span class="keyword">let</span> depsMap = targetMap.<span class="title function_">get</span>(target)</span><br><span class="line">  <span class="keyword">if</span> (!depsMap) <span class="keyword">return</span></span><br><span class="line">  <span class="keyword">const</span> dep = depsMap.<span class="title function_">get</span>(key)</span><br><span class="line">  <span class="keyword">if</span> (dep) dep.<span class="title function_">forEach</span>(<span class="function"><span class="params">eff</span> =&gt;</span> &#123;</span><br><span class="line">    eff.<span class="title function_">fn</span>()</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用</span></span><br><span class="line"><span class="keyword">const</span> student = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Adam&#x27;</span>,</span><br><span class="line">  <span class="attr">age</span>: <span class="string">&#x27;18&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> proxyStudent = <span class="title function_">reactiveFn</span>(student)</span><br><span class="line"><span class="title function_">effect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;.wrap&#x27;</span>).<span class="property">innerHTML</span> = proxyStudent.<span class="property">name</span> + proxyStudent.<span class="property">age</span></span><br><span class="line">&#125;)</span><br><span class="line">proxyStudent.<span class="property">age</span> = <span class="number">19</span></span><br></pre></td></tr></table></figure><h4 id="ref"><a href="#ref" class="headerlink" title="ref"></a>ref</h4><p><strong>reactive 只能构建复杂数据类型的响应性，proxy就是这样。</strong>vue为我们提供了ref来解决这个问题。比较不熟悉的是 <a href="https://link.juejin.cn/?target=https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/get" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/get">get</a>t和<a href="https://link.juejin.cn/?target=https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/set" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/set">set</a> </p><ol><li><code>ref 方法</code>：接收任意数据</li><li><code>ref 方法</code>：生成RefC实例，并进行返回</li><li><code>ref 方法</code>：利用 <a href="https://link.juejin.cn/?target=https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/get" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/get">get</a> 和<a href="https://link.juejin.cn/?target=https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/set" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/set">set</a> 监听<code>getter、setter</code> 行为，以便执行<strong>依赖收集和依赖触发</strong></li></ol><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">RefC</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params">value</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">_value</span> = value</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">get</span> <span class="title function_">value</span>() &#123;</span><br><span class="line">    <span class="keyword">if</span> (activeEffect) &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">&#x27;reffff&#x27;</span>, ref)</span><br><span class="line">      <span class="keyword">const</span> dep = ref.<span class="property">dep</span> || (ref.<span class="property">dep</span> = <span class="keyword">new</span> <span class="title class_">Set</span>())</span><br><span class="line">      dep.<span class="title function_">add</span>(activeEffect)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">_value</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">set</span> <span class="title function_">value</span>(<span class="params">newVal</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">_value</span> = newVal</span><br><span class="line">    <span class="keyword">if</span> (ref.<span class="property">dep</span>) ref.<span class="property">dep</span>.<span class="title function_">forEach</span>(<span class="function"><span class="params">eff</span> =&gt;</span> eff.<span class="title function_">fn</span>())</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ref</span>(<span class="params">value</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">RefC</span>(value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用  </span></span><br><span class="line"><span class="keyword">const</span> v = <span class="string">&#x27;小明&#x27;</span></span><br><span class="line"><span class="keyword">const</span> refVar = <span class="title function_">ref</span>(v)</span><br><span class="line"><span class="title function_">effect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;.wrap&#x27;</span>).<span class="property">innerHTML</span> = refVar.<span class="property">value</span></span><br><span class="line">&#125;)</span><br><span class="line">refVar.<span class="property">value</span> = <span class="string">&#x27;小红&#x27;</span></span><br></pre></td></tr></table></figure><h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a href="https://juejin.cn/post/7186248802423013432">https://juejin.cn/post/7186248802423013432</a></p><p>编译时、运行时的源码解析:</p><p><a href="https://blog.csdn.net/qq_34618600/article/details/140893125">https://blog.csdn.net/qq_34618600/article/details/140893125</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> vue </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> vue3 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>WeakMap记录</title>
+      <link href="/2024/07/21/weakMap/"/>
+      <url>/2024/07/21/weakMap/</url>
+      
+        <content type="html"><![CDATA[<h3 id="weakMap是什么"><a href="#weakMap是什么" class="headerlink" title="weakMap是什么"></a>weakMap是什么</h3><h4 id="前置"><a href="#前置" class="headerlink" title="前置"></a>前置</h4><p>垃圾回收机制：垃圾回收机制会释放对象所占用的内存，但是垃圾回收机制的时机是不可控的</p><p>弱引用：即使有这个引用，垃圾回收机制在执行回收的时机也会将其回收</p><p>强引用：如果程序中有对一个对象的强引用，那么垃圾回收机制不会将其回收，我们手动将引用置为null，才可删除这个强引用</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> obj = <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">obj = <span class="literal">null</span>; <span class="comment">// 取消了对对象的强引用</span></span><br></pre></td></tr></table></figure><p>以下是Map的使用，key &#x3D; null 不会导致 key 的原引用对象被回收，因为这只解除了key对array对象的引用，但是map.set形成了map对array对象的强引用</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> map = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"><span class="keyword">let</span> key = <span class="keyword">new</span> <span class="title class_">Array</span>(<span class="number">5</span> * <span class="number">1024</span> * <span class="number">1024</span>); </span><br><span class="line"><span class="comment">// 建立map 对 key 所引用对象的强引用</span></span><br><span class="line">map.<span class="title function_">set</span>(key, <span class="number">1</span>); </span><br><span class="line"><span class="comment">// key = null 不会导致 key 的原引用对象被回收</span></span><br><span class="line">key = <span class="literal">null</span>;</span><br><span class="line"><span class="comment">// 需要再解除map对key的引用才能使原引用对象被回收</span></span><br><span class="line">map.<span class="title function_">delete</span>(key);</span><br></pre></td></tr></table></figure><h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>ES6的一个新特性</p><p>weakMap是和Map类似，Map的key对其引用的对象是强引用，weakMap就是字面意思，弱引用</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> wm = <span class="keyword">new</span> <span class="title class_">WeakMap</span>()</span><br><span class="line">wm.<span class="title function_">set</span>(obj, <span class="number">1</span>)</span><br></pre></td></tr></table></figure><h3 id="amp-x20-为什么要增加weakMap"><a href="#amp-x20-为什么要增加weakMap" class="headerlink" title="&amp;#x20;为什么要增加weakMap"></a>&amp;#x20;为什么要增加weakMap</h3><h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p>1.只接受对象做为key</p><p>2.key对其所引用的对象是弱引用</p><p>3.WeakMap 不像 Map，一是没有遍历操作（即没有keys()、values()和entries()方法），也没有 size 属性，也不支持 clear 方法。</p><p>&amp;#x20;  WeakMap只有四个方法可用：get()、set()、has()、delete()。</p><h4 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h4><p>所以WeakMap 可以帮你省掉手动删除对象引用的步骤，一旦不再需要，WeakMap 里面的键名对象和所对应的键值对会自动消失。</p><p>当你不能或者不想控制关联数据的生命周期时就可以考虑使用 WeakMap</p><h3 id="amp-x20"><a href="#amp-x20" class="headerlink" title="&amp;#x20;"></a>&amp;#x20;</h3><h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><h4 id="1-在-DOM-对象上保存相关数据"><a href="#1-在-DOM-对象上保存相关数据" class="headerlink" title="1. 在 DOM 对象上保存相关数据"></a>1. 在 DOM 对象上保存相关数据</h4><p>传统使用 jQuery 的时候，我们会通过 $.data() 方法在 DOM 对象上储存相关信息(就比如在删除按钮元素上储存帖子的 ID 信息)，jQuery 内部会使用一个对象管理 DOM 和对应的数据，当你将 DOM 元素删除，DOM 对象置为空的时候，相关联的数据并不会被删除，你必须手动执行 $.removeData() 方法才能删除掉相关联的数据，WeakMap 就可以简化这一操作：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> wm = <span class="keyword">new</span> <span class="title class_">WeakMap</span>(), element = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&quot;.element&quot;</span>);</span><br><span class="line">wm.<span class="title function_">set</span>(element, <span class="string">&quot;data&quot;</span>);</span><br><span class="line"><span class="keyword">let</span> value = wm.<span class="title function_">get</span>(elemet);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(value); </span><br><span class="line"><span class="comment">//</span></span><br><span class="line">element.<span class="property">parentNode</span>.<span class="title function_">removeChild</span>(element);</span><br><span class="line">element = <span class="literal">null</span>;</span><br></pre></td></tr></table></figure><h4 id="2-数据缓存"><a href="#2-数据缓存" class="headerlink" title="2. 数据缓存"></a>2. 数据缓存</h4><p>从上一个例子，我们也可以看出，当我们需要关联对象和数据，比如在不修改原有对象的情况下储存某些属性或者根据对象储存一些计算的值等，而又不想管理这些数据的死活时非常适合考虑使用 WeakMap</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> cache = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">countOwnKeys</span>(<span class="params">obj</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (cache.<span class="title function_">has</span>(obj)) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Cached&#x27;</span>);</span><br><span class="line">        <span class="keyword">return</span> cache.<span class="title function_">get</span>(obj);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Computed&#x27;</span>);</span><br><span class="line">        <span class="keyword">const</span> count = <span class="title class_">Object</span>.<span class="title function_">keys</span>(obj).<span class="property">length</span>;</span><br><span class="line">        cache.<span class="title function_">set</span>(obj, count);</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h4 id="3-私有属性"><a href="#3-私有属性" class="headerlink" title="3. 私有属性"></a>3. 私有属性</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> privateData = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params">name, age</span>) &#123;</span><br><span class="line">        privateData.<span class="title function_">set</span>(<span class="variable language_">this</span>, &#123; <span class="attr">name</span>: name, <span class="attr">age</span>: age &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_">getName</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> privateData.<span class="title function_">get</span>(<span class="variable language_">this</span>).<span class="property">name</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_">getAge</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> privateData.<span class="title function_">get</span>(<span class="variable language_">this</span>).<span class="property">age</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="title class_">Person</span>;</span><br></pre></td></tr></table></figure><h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3>]]></content>
+      
+      
+      <categories>
+          
+          <category> es6 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> js </tag>
+            
+            <tag> es6 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Vue3源码学习方法</title>
+      <link href="/2024/07/20/Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"/>
+      <url>/2024/07/20/Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/</url>
+      
+        <content type="html"><![CDATA[<h4 id="vue3核心学习"><a href="#vue3核心学习" class="headerlink" title="vue3核心学习"></a>vue3核心学习</h4><h5 id="官方仓库"><a href="#官方仓库" class="headerlink" title="官方仓库"></a>官方仓库</h5><p><a href="https://github.com/vuejs/core">https://github.com/vuejs/core</a></p><h5 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h5><p>需要关注的，主要的目录就两个<br>package：源码都放在这里<br>scripts：脚本文件，配置文件，编译和打包用</p><h5 id="核心模块"><a href="#核心模块" class="headerlink" title="核心模块"></a>核心模块</h5><ol><li>reactivity，响应式模块。主要职责：监听响应式数据，进行响应式操作</li><li>compiler，编译时模块。主要职责：编译，将template模版编译成render函数</li><li>runtime，运行时模块。主要职责：渲染，将虚拟dom渲染到真实dom上</li></ol><h5 id="源码调试"><a href="#源码调试" class="headerlink" title="源码调试"></a>源码调试</h5><p>package.json中的脚本命令，主要关注，dev和build。<br>1.dev：实时编译，修改vue源码会实时编译<br>2.build：打包到dist下</p><p>执行<br>pnpm run build<br>在package&#x2F;vue目录下生成dist文件夹，针对不同模块打包成不同的文件</p><p>此时我们就可以编写测试文件。在packages&#x2F;vue&#x2F;example目录为vue提供了很多示例页面, 每个页面都引入Vue构建后的文件.&#x2F;packages&#x2F;vue&#x2F;dist&#x2F;vue.global.js。这些文件都可以调试，也可以在此目录新建测试文件。在浏览器中运行测试文件, F12打开开发工具, 在源代码栏找到测试文件打上断点，即可开始调试。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> vue </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> vue3 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>threejs全景看房</title>
       <link href="/2024/06/20/threejs-wholescene/"/>
       <url>/2024/06/20/threejs-wholescene/</url>
@@ -13,14 +90,12 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> threejs </category>
           
       </categories>
       
       
         <tags>
-            
-            <tag> js </tag>
             
             <tag> threejs </tag>
             
@@ -40,14 +115,12 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> threejs </category>
           
       </categories>
       
       
         <tags>
-            
-            <tag> js </tag>
             
             <tag> threejs </tag>
             
@@ -67,7 +140,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 应用 </category>
           
       </categories>
       
@@ -94,7 +167,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 应用 </category>
           
       </categories>
       
@@ -119,7 +192,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 应用 </category>
           
       </categories>
       
@@ -128,7 +201,7 @@
             
             <tag> css </tag>
             
-            <tag> html </tag>
+            <tag> 大屏 </tag>
             
         </tags>
       
@@ -146,7 +219,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> qiankun微前端 </category>
           
       </categories>
       
@@ -173,7 +246,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 应用 </category>
           
       </categories>
       
@@ -198,16 +271,16 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> vue </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> vue </tag>
+            <tag> vue2 </tag>
             
-            <tag> js </tag>
+            <tag> axios </tag>
             
         </tags>
       
@@ -225,7 +298,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 蓝牙 </category>
           
       </categories>
       
@@ -254,16 +327,14 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> vue </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> vue </tag>
-            
-            <tag> nexttick </tag>
+            <tag> vue2 </tag>
             
         </tags>
       
@@ -281,14 +352,14 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> vue </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> vue </tag>
+            <tag> vue2 </tag>
             
             <tag> webpack </tag>
             
@@ -308,7 +379,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -333,7 +404,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -358,14 +429,14 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> vue </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> vue </tag>
+            <tag> vue2 </tag>
             
         </tags>
       
@@ -383,7 +454,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -408,7 +479,7 @@
       
       <categories>
           
-          <category> plugin </category>
+          <category> 博客 </category>
           
       </categories>
       
@@ -433,16 +504,14 @@
       
       <categories>
           
-          <category> plugin </category>
+          <category> 应用 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> plugin </tag>
-            
-            <tag> img </tag>
+            <tag> canvas </tag>
             
         </tags>
       
@@ -460,7 +529,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 日常记录 </category>
           
       </categories>
       
@@ -485,16 +554,10 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 日常记录 </category>
           
       </categories>
       
-      
-        <tags>
-            
-            <tag> items </tag>
-            
-        </tags>
       
     </entry>
     
@@ -510,7 +573,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 日常记录 </category>
           
       </categories>
       
@@ -518,8 +581,6 @@
         <tags>
             
             <tag> app </tag>
-            
-            <tag> html </tag>
             
             <tag> audio </tag>
             
@@ -541,7 +602,7 @@
       
       <categories>
           
-          <category> sum </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -568,7 +629,7 @@
       
       <categories>
           
-          <category> sum </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -595,7 +656,7 @@
       
       <categories>
           
-          <category> sum </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -620,7 +681,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -645,14 +706,12 @@
       
       <categories>
           
-          <category> plugin </category>
+          <category> 应用 </category>
           
       </categories>
       
       
         <tags>
-            
-            <tag> plugin </tag>
             
             <tag> date </tag>
             
@@ -673,7 +732,7 @@
       
         <tags>
             
-            <tag> 浏览器 </tag>
+            <tag> browser </tag>
             
         </tags>
       
@@ -691,14 +750,12 @@
       
       <categories>
           
-          <category> plugin </category>
+          <category> 应用 </category>
           
       </categories>
       
       
         <tags>
-            
-            <tag> plugin </tag>
             
             <tag> excel </tag>
             
@@ -718,7 +775,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -726,8 +783,6 @@
         <tags>
             
             <tag> css </tag>
-            
-            <tag> margin </tag>
             
         </tags>
       
@@ -745,7 +800,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 日常记录 </category>
           
       </categories>
       
@@ -753,8 +808,6 @@
         <tags>
             
             <tag> element-ui </tag>
-            
-            <tag> plugin </tag>
             
         </tags>
       
@@ -772,7 +825,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -797,7 +850,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -822,7 +875,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 日常记录 </category>
           
       </categories>
       
@@ -847,16 +900,10 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 日常记录 </category>
           
       </categories>
       
-      
-        <tags>
-            
-            <tag> items </tag>
-            
-        </tags>
       
     </entry>
     
@@ -872,7 +919,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 日常记录 </category>
           
       </categories>
       
@@ -897,14 +944,14 @@
       
       <categories>
           
-          <category> browser </category>
+          <category> 基础-浏览器 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 浏览器 </tag>
+            <tag> browser </tag>
             
         </tags>
       
@@ -922,14 +969,14 @@
       
       <categories>
           
-          <category> browser </category>
+          <category> 基础-浏览器 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 浏览器 </tag>
+            <tag> browser </tag>
             
         </tags>
       
@@ -947,14 +994,14 @@
       
       <categories>
           
-          <category> browser </category>
+          <category> 基础-浏览器 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 浏览器 </tag>
+            <tag> browser </tag>
             
         </tags>
       
@@ -972,14 +1019,14 @@
       
       <categories>
           
-          <category> browser </category>
+          <category> 基础-浏览器 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 浏览器 </tag>
+            <tag> browser </tag>
             
         </tags>
       
@@ -997,14 +1044,14 @@
       
       <categories>
           
-          <category> browser </category>
+          <category> 基础-浏览器 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 浏览器 </tag>
+            <tag> browser </tag>
             
         </tags>
       
@@ -1022,14 +1069,14 @@
       
       <categories>
           
-          <category> browser </category>
+          <category> 基础-浏览器 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 浏览器 </tag>
+            <tag> browser </tag>
             
         </tags>
       
@@ -1047,14 +1094,14 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> vue </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> vue </tag>
+            <tag> vue2 </tag>
             
             <tag> vuex </tag>
             
@@ -1074,7 +1121,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -1099,7 +1146,7 @@
       
       <categories>
           
-          <category> summary </category>
+          <category> 基础 </category>
           
       </categories>
       
@@ -1124,18 +1171,6 @@
         <content type="html"><![CDATA[<span id="more"></span><h5 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World!"></a>Hello World!</h5><h6 id="写博客主要是梳理知识脉络，加强理解，当作快速查找和提升效率的文档，也希望能帮助到学习路上的每个人。"><a href="#写博客主要是梳理知识脉络，加强理解，当作快速查找和提升效率的文档，也希望能帮助到学习路上的每个人。" class="headerlink" title="写博客主要是梳理知识脉络，加强理解，当作快速查找和提升效率的文档，也希望能帮助到学习路上的每个人。"></a>写博客主要是梳理知识脉络，加强理解，当作快速查找和提升效率的文档，也希望能帮助到学习路上的每个人。</h6><h6 id="当然此博客初衷是自己看，所以有些未注明的转载，有些因为自己理解而写的不够详细的地方（如果您正在学习这些内容却遇到了此情况请移驾其他优秀博客网站）"><a href="#当然此博客初衷是自己看，所以有些未注明的转载，有些因为自己理解而写的不够详细的地方（如果您正在学习这些内容却遇到了此情况请移驾其他优秀博客网站）" class="headerlink" title="当然此博客初衷是自己看，所以有些未注明的转载，有些因为自己理解而写的不够详细的地方（如果您正在学习这些内容却遇到了此情况请移驾其他优秀博客网站）"></a>当然此博客初衷是自己看，所以有些未注明的转载，有些因为自己理解而写的不够详细的地方（如果您正在学习这些内容却遇到了此情况请移驾其他优秀博客网站）</h6><p>由于某平台部署需要离谱的审核，所以迁移到github。</p>]]></content>
       
       
-      <categories>
-          
-          <category> summary </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> html </tag>
-            
-        </tags>
       
     </entry>
     
