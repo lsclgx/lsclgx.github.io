@@ -48,7 +48,7 @@
   isHome: true,
   isHighlightShrink: false,
   isToc: false,
-  postUpdate: '2024-10-21 22:15:49'
+  postUpdate: '2024-10-21 22:16:36'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -140,15 +140,7 @@
     })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://lsclgx.github.io/img/avatar.webp" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">47</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">lsc的博客</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2020/11/30/helloworld/" title="Hello World!">Hello World!</a><div class="article-meta-wrap"><span class="article-meta"><i class="fas fa-thumbtack sticky"></i><span class="sticky">置顶</span><span class="article-meta-separator">|</span></span><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-30T14:04:05.000Z" title="发表于 2020-11-30 22:04:05">2020-11-30</time></span></div><div class="content">
 
 Hello World!写博客主要是梳理知识脉络，加强理解，当作快速查找和提升效率的文档，也希望能帮助到学习路上的每个人。当然此博客初衷是自己看，所以有些未注明的转载，有些因为自己理解而写的不够详细的地方（如果您正在学习这些内容却遇到了此情况请移驾其他优秀博客网站）由于某平台部署需要离谱的审核，所以迁移到github。
-</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/07/21/weakMap/" title="WeakMap记录">WeakMap记录</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-07-21T12:55:55.000Z" title="发表于 2024-07-21 20:55:55">2024-07-21</time></span><span class="article-meta tags"><span class="article-meta-separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/js/">js</a><span class="article-meta-link">•</span><a class="article-meta__tags" href="/tags/es6/">es6</a></span></div><div class="content">weakMap是什么前置垃圾回收机制：垃圾回收机制会释放对象所占用的内存，但是垃圾回收机制的时机是不可控的
-弱引用：即使有这个引用，垃圾回收机制在执行回收的时机也会将其回收
-强引用：如果程序中有对一个对象的强引用，那么垃圾回收机制不会将其回收，我们手动将引用置为null，才可删除这个强引用
-12var obj = new Object();obj = null; // 取消了对对象的强引用
-
-以下是Map的使用，key &#x3D; null 不会导致 key 的原引用对象被回收，因为这只解除了key对array对象的引用，但是map.set形成了map对array对象的强引用
-12345678let map = new Map();let key = new Array(5 * 1024 * 1024); // 建立map 对 key 所引用对象的强引用map.set(key, 1); // key = null 不会导致 key 的原引用对象被回收key = null;// 需要再解除map对key的引用才能使原引用对象被回收map.delete(key);
-
-定义ES6的一个新特 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/06/20/threejs-wholescene/" title="threejs全景看房">threejs全景看房</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-06-20T15:00:05.000Z" title="发表于 2024-06-20 23:00:05">2024-06-20</time></span><span class="article-meta tags"><span class="article-meta-separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/threejs/">threejs</a></span></div><div class="content">背景做物联网智能家居场景的时候，有个需求，类似全景看房，房内有我们智能家居设备的展示
+</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/06/20/threejs-wholescene/" title="threejs全景看房">threejs全景看房</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-06-20T15:00:05.000Z" title="发表于 2024-06-20 23:00:05">2024-06-20</time></span><span class="article-meta tags"><span class="article-meta-separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/threejs/">threejs</a></span></div><div class="content">背景做物联网智能家居场景的时候，有个需求，类似全景看房，房内有我们智能家居设备的展示
 前端实现参考链接：https://www.cnblogs.com/dragonir/p/17301683.html参考链接：https://www.zhihu.com/tardis/bd/art/692857119?source_id=1001
 实现原理示意图如下所示，页面总共将创建 3 个场景，origin 表示当前场景，destination 表示目标场景，利用当前场景和目标场景合成用于展示过渡效果的 transition 过渡场景，当点击切换房间按钮时，三个场景的加载顺便分别为 origin -&gt; transition -&gt; destiontion，由此在视觉上形成从上个房间切换到下个房间并且伴随渐变过渡的场景漫游效果。
 
@@ -166,7 +158,15 @@ effect：响应式的依赖收集和触发的机制的体现
 reactive函数：提供出去要使用的函数
 track：收集&#x2F;追踪依赖
 trigger：触发依赖
-1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253// effect，接收一个回调函数，执行let activeEffect = nullclass reactiveEffect &#123;  constructor(fn) &#123;    thi ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/04/20/Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" title="Vue3源码学习方法">Vue3源码学习方法</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-04-20T02:50:03.000Z" title="发表于 2024-04-20 10:50:03">2024-04-20</time></span><span class="article-meta tags"><span class="article-meta-separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/vue3/">vue3</a></span></div><div class="content">vue3核心学习官方仓库https://github.com/vuejs/core
+1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253// effect，接收一个回调函数，执行let activeEffect = nullclass reactiveEffect &#123;  constructor(fn) &#123;    thi ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/04/21/weakMap/" title="WeakMap记录">WeakMap记录</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-04-21T12:55:55.000Z" title="发表于 2024-04-21 20:55:55">2024-04-21</time></span><span class="article-meta tags"><span class="article-meta-separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/js/">js</a><span class="article-meta-link">•</span><a class="article-meta__tags" href="/tags/es6/">es6</a></span></div><div class="content">weakMap是什么前置垃圾回收机制：垃圾回收机制会释放对象所占用的内存，但是垃圾回收机制的时机是不可控的
+弱引用：即使有这个引用，垃圾回收机制在执行回收的时机也会将其回收
+强引用：如果程序中有对一个对象的强引用，那么垃圾回收机制不会将其回收，我们手动将引用置为null，才可删除这个强引用
+12var obj = new Object();obj = null; // 取消了对对象的强引用
+
+以下是Map的使用，key &#x3D; null 不会导致 key 的原引用对象被回收，因为这只解除了key对array对象的引用，但是map.set形成了map对array对象的强引用
+12345678let map = new Map();let key = new Array(5 * 1024 * 1024); // 建立map 对 key 所引用对象的强引用map.set(key, 1); // key = null 不会导致 key 的原引用对象被回收key = null;// 需要再解除map对key的引用才能使原引用对象被回收map.delete(key);
+
+定义ES6的一个新特 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/04/20/Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" title="Vue3源码学习方法">Vue3源码学习方法</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-04-20T02:50:03.000Z" title="发表于 2024-04-20 10:50:03">2024-04-20</time></span><span class="article-meta tags"><span class="article-meta-separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/vue3/">vue3</a></span></div><div class="content">vue3核心学习官方仓库https://github.com/vuejs/core
 目录结构需要关注的，主要的目录就两个package：源码都放在这里scripts：脚本文件，配置文件，编译和打包用
 核心模块
 reactivity，响应式模块。主要职责：监听响应式数据，进行响应式操作
